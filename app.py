@@ -37,5 +37,8 @@ map_data = pd.DataFrame(
     columns=['lat', 'lon'])
 st.map(map_data)
 
-titanic = pd.read_csv("./data/titanic.csv")
-st.write(titanic)
+# Excel 파일을 읽기 위해 read_excel 사용
+keyword = pd.read_excel("./data/keyword.xlsx")
+
+# DataFrame 출력
+st.write(keyword)
