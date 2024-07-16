@@ -15,8 +15,24 @@ df = pd.read_excel(file_path)
 st.write("Uploaded Data:")
 st.write(df)
 
-# Select column for clustering
-category_col = st.selectbox("Select the category column", df.columns)
+# Category names
+category_names = {
+    0: 'Thickness',
+    1: 'Price',
+    2: 'Material',
+    3: 'Body',
+    4: 'Season',
+    5: 'Color',
+    6: 'Washing',
+    7: 'Length',
+    8: 'Design',
+    9: 'Size',
+    10: 'Delivery',
+    11: 'Quality'
+}
+
+# Assign human-readable names to categories
+df['category_name'] = df['category'].map(category_names)
 
 # Select number of clusters
 num_clusters = st.slider("Select the number of clusters", min_value=2, max_value=10, value=3)
@@ -24,19 +40,28 @@ num_clusters = st.slider("Select the number of clusters", min_value=2, max_value
 # Perform clustering
 if st.button("Run Clustering"):
     # Convert category data to numeric
-    df['category_numeric'] = pd.factorize(df[category_col])[0]
+    df['category_numeric'] = pd.factorize(df['category'])[0]
 
     # Create and train the K-means model
     kmeans = KMeans(n_clusters=num_clusters)
     df['cluster'] = kmeans.fit_predict(df[['category_numeric']])
 
     st.write("Clustering Results:")
-    st.write(df[['keyword', 'count', 'category', 'cluster']])
+    st.write(df[['keyword', 'count', 'category_name', 'cluster']])
 
-    # Visualize the clustering results
+
+    # Visualize the distribution of categories within each cluster using a bar plot
     plt.figure(figsize=(10, 6))
-    sns.scatterplot(x=df.index, y='category_numeric', hue='cluster', data=df, palette='viridis')
-    plt.title('Clustering Results by Category')
-    plt.xlabel('Index')
-    plt.ylabel(category_col)
+    sns.countplot(x='cluster', hue='category_name', data=df, palette='viridis')
+    plt.title('Category Distribution within Clusters')
+    plt.xlabel('Cluster')
+    plt.ylabel('Count')
+    st.pyplot(plt)
+
+    # Visualize the keyword counts within each cluster using a box plot
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(x='cluster', y='count', data=df, palette='viridis')
+    plt.title('Keyword Counts within Clusters')
+    plt.xlabel('Cluster')
+    plt.ylabel('Count')
     st.pyplot(plt)
